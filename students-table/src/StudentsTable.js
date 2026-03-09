@@ -16,9 +16,10 @@ function StudentsTable() {
   const fetchStudents = async () => {
     try {
       const response = await axios.get('/students');
-      setStudents(response.data);
+      setStudents(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error('Error fetching students:', error);
+      setStudents([]);
     }
   };
 
