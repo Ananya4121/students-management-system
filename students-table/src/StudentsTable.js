@@ -1,27 +1,21 @@
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import axios from "axios";
 
 function StudentsTable() {
-  const [students, setStudents] = useState([]);
+  // Initialize with empty array or load from localStorage if available
+  const [students, setStudents] = useState(() => {
+    const saved = localStorage.getItem('students');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [form, setForm] = useState({ name: "", email: "", age: "" });
   const [editIndex, setEditIndex] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Save to localStorage whenever students change
   useEffect(() => {
-    fetchStudents();
-  }, []);
-
-  const fetchStudents = async () => {
-    try {
-      const response = await axios.get('/students');
-      setStudents(Array.isArray(response.data) ? response.data : []);
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      setStudents([]);
-    }
-  };
+    localStorage.setItem('students', JSON.stringify(students));
+  }, [students]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -43,27 +37,31 @@ function StudentsTable() {
     return true;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!validate()) return;
 
     setLoading(true);
 
-    try {
+    // Simulate loading delay
+    setTimeout(() => {
       if (editIndex !== null) {
-        await axios.put(`/students/${students[editIndex].id}`, form);
+        // Update existing student
+        const updatedStudents = [...students];
+        updatedStudents[editIndex] = { ...form, id: students[editIndex].id || Date.now() };
+        setStudents(updatedStudents);
         setEditIndex(null);
       } else {
-        await axios.post('/students', form);
+        // Add new student
+        const newStudent = {
+          ...form,
+          id: Date.now(), // Generate unique ID
+        };
+        setStudents([...students, newStudent]);
       }
 
       setForm({ name: "", email: "", age: "" });
-      fetchStudents(); // refresh list
-    } catch (error) {
-      console.error('Error saving student:', error);
-      alert('Error saving student');
-    } finally {
       setLoading(false);
-    }
+    }, 500); // Simulated loading delay
   };
 
   const handleEdit = (index) => {
@@ -71,15 +69,11 @@ function StudentsTable() {
     setEditIndex(index);
   };
 
-  const handleDelete = async (index) => {
+  const handleDelete = (index) => {
     if (window.confirm("Are you sure you want to delete?")) {
-      try {
-        await axios.delete(`/students/${students[index].id}`);
-        fetchStudents(); // refresh list
-      } catch (error) {
-        console.error('Error deleting student:', error);
-        alert('Error deleting student');
-      }
+      // Remove student from array
+      const updatedStudents = students.filter((_, i) => i !== index);
+      setStudents(updatedStudents);
     }
   };
 
@@ -148,19 +142,26 @@ function StudentsTable() {
         </thead>
 
         <tbody>
-          {students.map((student, index) => (
-            <tr key={index}>
-              <td>{student.name}</td>
-              <td>{student.email}</td>
-              <td>{student.age}</td>
-
-              <td>
-                <button onClick={() => handleEdit(index)}>Edit</button>
-
-                <button onClick={() => handleDelete(index)}>Delete</button>
+          {students.length === 0 ? (
+            <tr>
+              <td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>
+                No students added yet. Add a student to get started!
               </td>
             </tr>
-          ))}
+          ) : (
+            students.map((student, index) => (
+              <tr key={student.id || index}>
+                <td>{student.name}</td>
+                <td>{student.email}</td>
+                <td>{student.age}</td>
+
+                <td>
+                  <button onClick={() => handleEdit(index)}>Edit</button>
+                  <button onClick={() => handleDelete(index)}>Delete</button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

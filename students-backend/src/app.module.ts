@@ -8,13 +8,14 @@ import { StudentsModule } from './students/students.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5433,
-      username: 'soorajjain',
-      password: '',
-      database: 'students_db',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT || '5433'),
+      username: process.env.DB_USERNAME || 'soorajjain',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'students_db',
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: process.env.NODE_ENV !== 'production', // Only sync in dev
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     }),
     StudentsModule
   ],
