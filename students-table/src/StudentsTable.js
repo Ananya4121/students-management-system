@@ -141,9 +141,6 @@ function StudentsTable() {
       <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
         <div>
           <h2 className="mb-1">Students</h2>
-          <div className="text-muted small">
-            Frontend-only CRUD • Saved in your browser (localStorage)
-          </div>
         </div>
 
         <div className="d-flex align-items-center gap-2">
