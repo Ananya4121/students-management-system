@@ -1,5 +1,7 @@
 # Getting Started with Create React App
 
+<!-- Deployment author fix: trigger redeploy with correct git author (Ananya T P) -->
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
